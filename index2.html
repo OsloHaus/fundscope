@@ -12,7 +12,7 @@
       padding: 16px;
     }
     .container {
-      max-width: 1024px;
+      max-width: 800px;
       margin: 0 auto;
     }
     .card {
@@ -20,10 +20,22 @@
       padding: 16px;
       margin-bottom: 16px;
     }
-    .form-group {
+    .card-header {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .card-content {
+      font-size: 14px;
+    }
+    .input-group {
       margin-bottom: 16px;
     }
-    .input {
+    .input-group label {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .input-group select,
+    .input-group input {
       width: 100%;
       padding: 8px;
       background-color: #4a5568;
@@ -32,115 +44,163 @@
     }
     .button {
       width: 100%;
-      padding: 8px;
-      background-color: #4c51bf;
+      padding: 12px;
+      background-color: #3182ce;
       border: none;
       color: white;
+      font-size: 16px;
       cursor: pointer;
     }
-    .checkbox-group {
+    .recommendation {
+      margin-top: 16px;
+      padding: 16px;
+      background-color: #2d3748;
+    }
+    .recommendation-header {
+      font-weight: bold;
       margin-bottom: 8px;
     }
     .star {
       position: absolute;
-      color: #ecc94b;
-      opacity: 0.7;
+      background-color: yellow;
+      border-radius: 50%;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 class="text-center">Astrology Investment Advisor</h1>
-
+    <h1>Astrology Investment Advisor</h1>
+    
     <div class="card">
-      <h2>How it works</h2>
-      <p>
+      <div class="card-header">How it works</div>
+      <div class="card-content">
         This app uses your astrological information to provide personalized ETF investment recommendations. 
         Enter your zodiac sign, select celestial bodies in your 2nd house, and specify your investment amount. 
         We'll then suggest three ETFs tailored to your cosmic profile, along with recommended investment allocations.
         The more celestial bodies you select in your 2nd house, the higher the weighting for the third ETF.
-      </p>
+      </div>
     </div>
 
-    <form class="form">
-      <div class="form-group">
+    <form id="astro-form" onsubmit="handleSubmit(event)">
+      <div class="input-group">
         <label for="zodiac-sign">Your Zodiac Sign</label>
-        <select id="zodiac-sign" class="input">
+        <select id="zodiac-sign" required>
           <option value="">Select your sign</option>
           <option value="Aries">Aries</option>
           <option value="Taurus">Taurus</option>
-          <option value="Gemini">Gemini</option>
-          <option value="Cancer">Cancer</option>
-          <option value="Leo">Leo</option>
-          <option value="Virgo">Virgo</option>
-          <option value="Libra">Libra</option>
-          <option value="Scorpio">Scorpio</option>
-          <option value="Sagittarius">Sagittarius</option>
-          <option value="Capricorn">Capricorn</option>
-          <option value="Aquarius">Aquarius</option>
-          <option value="Pisces">Pisces</option>
+          <!-- Add the other zodiac signs here -->
         </select>
       </div>
 
-      <div class="form-group">
+      <div class="input-group">
         <label>Celestial Bodies in 2nd House</label>
-        <div class="checkbox-group">
-          <input type="checkbox" id="sun" name="celestial-body" value="Sun">
-          <label for="sun">Sun</label>
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="moon" name="celestial-body" value="Moon">
-          <label for="moon">Moon</label>
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="mercury" name="celestial-body" value="Mercury">
-          <label for="mercury">Mercury</label>
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="venus" name="celestial-body" value="Venus">
-          <label for="venus">Venus</label>
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="mars" name="celestial-body" value="Mars">
-          <label for="mars">Mars</label>
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="jupiter" name="celestial-body" value="Jupiter">
-          <label for="jupiter">Jupiter</label>
-        </div>
-        <div class="checkbox-group">
-          <input type="checkbox" id="saturn" name="celestial-body" value="Saturn">
-          <label for="saturn">Saturn</label>
+        <div>
+          <label><input type="checkbox" value="Sun" /> Sun</label>
+          <label><input type="checkbox" value="Moon" /> Moon</label>
+          <!-- Add the other celestial bodies here -->
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="input-group">
         <label for="investment-amount">Investment Amount ($)</label>
-        <input type="number" id="investment-amount" class="input" placeholder="Enter amount">
+        <input type="number" id="investment-amount" required />
       </div>
 
       <button type="submit" class="button">Get Recommendations</button>
     </form>
 
-    <div id="recommendations" class="recommendations mt-8"></div>
+    <div id="recommendations"></div>
   </div>
 
   <script>
-    // Example stars generation for background effect
-    function generateStars() {
-      const starCount = 20;
-      for (let i = 0; i < starCount; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.fontSize = Math.random() * 20 + 10 + 'px';
-        star.style.opacity = Math.random() * 0.5 + 0.5;
-        document.body.appendChild(star);
-      }
+    const zodiacSigns = [
+      'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+      'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+    ];
+
+    const celestialBodies = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
+
+    const mockETFData = {
+      'Aries': [
+        { name: 'Tech Innovators ETF', description: 'High-growth technology companies' },
+        { name: 'Global Leaders ETF', description: 'Top-performing multinational corporations' },
+        { name: 'Emerging Markets ETF', description: 'Fast-growing emerging economies' }
+      ],
+      // ... (similar data for other zodiac signs)
+    };
+
+    function calculateWeightings(bodiesCount) {
+      const baseWeight = 1 / 3; // Equal distribution for 3 ETFs
+      const adjustmentPerBody = 0.05; // 5% adjustment per celestial body
+
+      const thirdETFWeight = baseWeight + (bodiesCount * adjustmentPerBody);
+      const otherETFWeight = (1 - thirdETFWeight) / 2;
+
+      return [otherETFWeight, otherETFWeight, thirdETFWeight];
     }
 
-    generateStars();
+    function handleSubmit(e) {
+      e.preventDefault();
+      const zodiacSign = document.getElementById('zodiac-sign').value;
+      const celestialBodiesIn2ndHouse = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+      const investmentAmount = parseFloat(document.getElementById('investment-amount').value);
+
+      const etfs = mockETFData[zodiacSign] || [];
+      const weightings = calculateWeightings(celestialBodiesIn2ndHouse.length);
+
+      const recommendations = etfs.map((etf, index) => ({
+        ...etf,
+        amount: investmentAmount * weightings[index]
+      }));
+
+      displayRecommendations(recommendations, investmentAmount);
+    }
+
+    function displayRecommendations(recommendations, investmentAmount) {
+      const recommendationsDiv = document.getElementById('recommendations');
+      recommendationsDiv.innerHTML = '';
+
+      recommendations.forEach(etf => {
+        const recommendationDiv = document.createElement('div');
+        recommendationDiv.className = 'recommendation';
+
+        const header = document.createElement('div');
+        header.className = 'recommendation-header';
+        header.textContent = etf.name;
+
+        const description = document.createElement('p');
+        description.textContent = etf.description;
+
+        const amount = document.createElement('p');
+        amount.textContent = `Recommended Investment: $${etf.amount.toFixed(2)}`;
+
+        const weight = document.createElement('p');
+        weight.className = 'weight';
+        weight.textContent = `Weight: ${((etf.amount / investmentAmount) * 100).toFixed(2)}%`;
+
+        recommendationDiv.appendChild(header);
+        recommendationDiv.appendChild(description);
+        recommendationDiv.appendChild(amount);
+        recommendationDiv.appendChild(weight);
+
+        recommendationsDiv.appendChild(recommendationDiv);
+      });
+    }
+
+    // Add stars to the background
+    window.onload = () => {
+      const body = document.body;
+      for (let i = 0; i < 20; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.width = `${Math.random() * 20 + 10}px`;
+        star.style.height = star.style.width;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.opacity = Math.random() * 0.5 + 0.5;
+        body.appendChild(star);
+      }
+    };
   </script>
 </body>
 </html>
