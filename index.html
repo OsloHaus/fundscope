@@ -1,192 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astrological Investment Recommender</title>
-    <style>
-        body {
-            background-color: #1a202c;
-            color: white;
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
-            padding: 2rem;
-        }
-        h1 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 2rem;
-        }
-        form {
-            max-width: 400px;
-            margin: 0 auto;
-            margin-bottom: 3rem;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 0.5rem;
-            background-color: #2d3748;
-            border: 1px solid #4a5568;
-            color: white;
-        }
-        .form-group button {
-            width: 100%;
-            padding: 0.75rem;
-            background-color: #5a67d8;
-            border: none;
-            color: white;
-            cursor: pointer;
-        }
-        .form-group button:hover {
-            background-color: #434190;
-        }
-        .recommendations {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-        }
-        .card {
-            background-color: #2d3748;
-            border: 1px solid #4a5568;
-            padding: 1rem;
-        }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .star {
-            color: #ffc107;
-        }
-        .chart {
-            height: 100px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Astrology Investment Advisor</title>
+  <style>
+    body {
+      background-color: #1a202c;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 16px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .card {
+      background-color: #2d3748;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .card-header {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .card-content {
+      font-size: 14px;
+    }
+    .input-group {
+      margin-bottom: 16px;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .input-group select,
+    .input-group input {
+      width: 100%;
+      padding: 8px;
+      background-color: #4a5568;
+      border: none;
+      color: white;
+    }
+    .button {
+      width: 100%;
+      padding: 12px;
+      background-color: #3182ce;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .recommendation {
+      margin-top: 16px;
+      padding: 16px;
+      background-color: #2d3748;
+    }
+    .recommendation-header {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .star {
+      position: absolute;
+      background-color: yellow;
+      border-radius: 50%;
+    }
+  </style>
 </head>
 <body>
-    <h1>Astrological Investment Recommender</h1>
+  <div class="container">
+    <h1>Astrology Investment Advisor</h1>
     
-    <form id="investment-form">
-        <div class="form-group">
-            <input type="text" id="name" placeholder="Your Name" required>
+    <div class="card">
+      <div class="card-header">How it works</div>
+      <div class="card-content">
+        This app uses your astrological information to provide personalized ETF investment recommendations. 
+        Enter your zodiac sign, select celestial bodies in your 2nd house, and specify your investment amount. 
+        We'll then suggest three ETFs tailored to your cosmic profile, along with recommended investment allocations.
+        The more celestial bodies you select in your 2nd house, the higher the weighting for the third ETF.
+      </div>
+    </div>
+
+    <form id="astro-form" onsubmit="handleSubmit(event)">
+      <div class="input-group">
+        <label for="zodiac-sign">Your Zodiac Sign</label>
+        <select id="zodiac-sign" required>
+          <option value="">Select your sign</option>
+          <option value="Aries">Aries</option>
+          <option value="Taurus">Taurus</option>
+          <!-- Add the other zodiac signs here -->
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Celestial Bodies in 2nd House</label>
+        <div>
+          <label><input type="checkbox" value="Sun" /> Sun</label>
+          <label><input type="checkbox" value="Moon" /> Moon</label>
+          <!-- Add the other celestial bodies here -->
         </div>
-        <div class="form-group">
-            <input type="date" id="birth-date" required>
-        </div>
-        <div class="form-group">
-            <input type="time" id="birth-time" required>
-        </div>
-        <div class="form-group">
-            <input type="number" id="investment" placeholder="Investment Amount ($)" required min="0" step="0.01">
-        </div>
-        <div class="form-group">
-            <button type="submit">Get Recommendations</button>
-        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="investment-amount">Investment Amount ($)</label>
+        <input type="number" id="investment-amount" required />
+      </div>
+
+      <button type="submit" class="button">Get Recommendations</button>
     </form>
-    
-    <div class="recommendations" id="recommendations"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const mockETFData = [
-            { name: 'Celestial Growth ETF', price: 150.25, history: [140, 145, 148, 152, 150.25] },
-            { name: 'Zodiac Tech ETF', price: 200.75, history: [190, 195, 205, 198, 200.75] },
-            { name: 'Cosmic Value ETF', price: 85.50, history: [80, 82, 86, 84, 85.50] },
-            { name: 'Astral Dividend ETF', price: 120.00, history: [115, 118, 122, 119, 120] },
-            { name: 'Nebula Small Cap ETF', price: 65.75, history: [62, 64, 67, 66, 65.75] },
-        ];
+    <div id="recommendations"></div>
+  </div>
 
-        const getPersonalizedRecommendations = (birthDate, investment) => {
-            const birthDateObj = new Date(birthDate);
-            const month = birthDateObj.getMonth();
-            const day = birthDateObj.getDate();
-            
-            const allocations = [
-                0.2 + (month * 0.01),
-                0.25 - (day * 0.001),
-                0.15 + ((month + day) * 0.002),
-                0.2 - (month * 0.005),
-                0.2 + (day * 0.002)
-            ];
-            
-            return mockETFData.map((etf, index) => ({
-                ...etf,
-                recommendedInvestment: (allocations[index] * investment).toFixed(2)
-            }));
-        };
+  <script>
+    const zodiacSigns = [
+      'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+      'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+    ];
 
-        document.getElementById('investment-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            const birthDate = document.getElementById('birth-date').value;
-            const birthTime = document.getElementById('birth-time').value;
-            const investment = parseFloat(document.getElementById('investment').value);
-            const recommendations = getPersonalizedRecommendations(birthDate, investment);
-            displayRecommendations(recommendations);
-        });
+    const celestialBodies = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
 
-        const displayRecommendations = (recommendations) => {
-            const recommendationsContainer = document.getElementById('recommendations');
-            recommendationsContainer.innerHTML = '';
-            
-            recommendations.forEach((etf, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                
-                const cardHeader = document.createElement('div');
-                cardHeader.className = 'card-header';
-                const title = document.createElement('h2');
-                title.textContent = etf.name;
-                const star = document.createElement('span');
-                star.className = 'star';
-                star.textContent = '★';
-                cardHeader.appendChild(title);
-                cardHeader.appendChild(star);
-                card.appendChild(cardHeader);
-                
-                const price = document.createElement('p');
-                price.textContent = `Current Price: $${etf.price}`;
-                card.appendChild(price);
-                
-                const recommendedInvestment = document.createElement('p');
-                recommendedInvestment.textContent = `Recommended Investment: $${etf.recommendedInvestment}`;
-                card.appendChild(recommendedInvestment);
-                
-                const chartContainer = document.createElement('canvas');
-                chartContainer.className = 'chart';
-                chartContainer.id = `chart-${index}`;
-                card.appendChild(chartContainer);
-                
-                recommendationsContainer.appendChild(card);
-                
-                new Chart(chartContainer, {
-                    type: 'line',
-                    data: {
-                        labels: etf.history.map((_, i) => `Day ${i + 1}`),
-                        datasets: [{
-                            data: etf.history,
-                            borderColor: '#8884d8',
-                            fill: false,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: { display: false },
-                            y: { display: false }
-                        },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { enabled: false }
-                        }
-                    }
-                });
-            });
-        };
-    </script>
+    const mockETFData = {
+      'Aries': [
+        { name: 'Tech Innovators ETF', description: 'High-growth technology companies' },
+        { name: 'Global Leaders ETF', description: 'Top-performing multinational corporations' },
+        { name: 'Emerging Markets ETF', description: 'Fast-growing emerging economies' }
+      ],
+      // ... (similar data for other zodiac signs)
+    };
+
+    function calculateWeightings(bodiesCount) {
+      const baseWeight = 1 / 3; // Equal distribution for 3 ETFs
+      const adjustmentPerBody = 0.05; // 5% adjustment per celestial body
+
+      const thirdETFWeight = baseWeight + (bodiesCount * adjustmentPerBody);
+      const otherETFWeight = (1 - thirdETFWeight) / 2;
+
+      return [otherETFWeight, otherETFWeight, thirdETFWeight];
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const zodiacSign = document.getElementById('zodiac-sign').value;
+      const celestialBodiesIn2ndHouse = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+      const investmentAmount = parseFloat(document.getElementById('investment-amount').value);
+
+      const etfs = mockETFData[zodiacSign] || [];
+      const weightings = calculateWeightings(celestialBodiesIn2ndHouse.length);
+
+      const recommendations = etfs.map((etf, index) => ({
+        ...etf,
+        amount: investmentAmount * weightings[index]
+      }));
+
+      displayRecommendations(recommendations, investmentAmount);
+    }
+
+    function displayRecommendations(recommendations, investmentAmount) {
+      const recommendationsDiv = document.getElementById('recommendations');
+      recommendationsDiv.innerHTML = '';
+
+      recommendations.forEach(etf => {
+        const recommendationDiv = document.createElement('div');
+        recommendationDiv.className = 'recommendation';
+
+        const header = document.createElement('div');
+        header.className = 'recommendation-header';
+        header.textContent = etf.name;
+
+        const description = document.createElement('p');
+        description.textContent = etf.description;
+
+        const amount = document.createElement('p');
+        amount.textContent = `Recommended Investment: $${etf.amount.toFixed(2)}`;
+
+        const weight = document.createElement('p');
+        weight.className = 'weight';
+        weight.textContent = `Weight: ${((etf.amount / investmentAmount) * 100).toFixed(2)}%`;
+
+        recommendationDiv.appendChild(header);
+        recommendationDiv.appendChild(description);
+        recommendationDiv.appendChild(amount);
+        recommendationDiv.appendChild(weight);
+
+        recommendationsDiv.appendChild(recommendationDiv);
+      });
+    }
+
+    // Add stars to the background
+    window.onload = () => {
+      const body = document.body;
+      for (let i = 0; i < 20; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.width = `${Math.random() * 20 + 10}px`;
+        star.style.height = star.style.width;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.opacity = Math.random() * 0.5 + 0.5;
+        body.appendChild(star);
+      }
+    };
+  </script>
 </body>
 </html>
 
